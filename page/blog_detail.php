@@ -1,4 +1,27 @@
 <! DOCTYPE html>
+<?php 
+$bdd = new PDO( 'mysql:host=localhost;dbname=articles', 'root', 'root');
+
+if(isset($_GET['id']) AND !empty($_GET['id'])){
+    $get_id = htmlspecialchars($_GET['id']);
+    
+    $article = $bdd->prepare('SELECT * FROM articles WHERE id = ?');
+    $article->execute(array($get_id));
+    
+    //verifie que il y a bien un article
+    if($article->rowCount() == 1){
+        $article = $article->fetch();
+        $titre = $article['titre'];
+        $contenu = $article['contenu'];
+    }else{
+        die('cet article n existe pas');
+    }
+}else{
+    die('erreur');
+}
+
+?>
+
 <html> 
 	<head lang="eng">
 		<meta charset="utf-8">
@@ -14,22 +37,7 @@
 	</head>
 	
 	<body>
-		<header id="pinkMenu">
-			<a href="../index.html"><img src="../asset/img/logo.png" alt="logo"/></a>
-			<nav>
-				<ul>
-					<li><a href="../index.html#howItWork">How it Work</a></li>
-					<li><a href="../index.html#download">Product</a></li>
-					<li><a href="../index.html#pricing">Pricing</a></li>
-					<li><a href="blog.html">Blog</a></li>
-					<li><a href="contact.html">Contact</a></li>
- 				</ul>
-			</nav>
-			<div class="ttButton">
-				<a href="#">Shop</a>
-				<a href="#">Login</a>
-			</div><!--ttButton-->
-		</header>
+		<?php include 'header.php'; ?>
 		
 		<main id="page">
 			<section id="titlePage">
@@ -46,7 +54,7 @@
                 <div class="casAside">
                     <section id="welcome" class="textwelcome">
                         <h3>Introzap feel free contact us, welcome </h3>
-                        <p>With the first month behind us and feet firmly planted in February, we are now well into 2017 now and have many exciting things happening at introzap.</p>
+                        <p>Tracking customer event data, such as for Kissmetrics’ behavioral analytics solution</p>
                         
                           <div class="lienSocialBlog">
                             <p>5 comments yet</p>
@@ -62,8 +70,8 @@
                     <section id="detailBlog1" class="content">
                          <figure>
                              <figcaption>
-                                <h2> How to Leverage Behavioral Data Across <br>Your Company</h2>
-                                <p>Running your own business can be hugely rewarding, but for many small business owners having the sole responsibility for the company’s success or failure can take a heavy toll. Did you know that currently over 3 million Australians are livin...</p>
+                                <h2><?=$titre ?></h2>
+                                <p><?= $contenu ?></p>
                              </figcaption>
                              <div class="imgBlogGD"></div>
                          </figure>

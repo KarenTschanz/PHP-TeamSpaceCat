@@ -1,3 +1,91 @@
+<?php 
+
+// INI DB
+$db = new PDO(
+    'mysql:host=localhost;dbname=Spacecat', 'root', 'root'
+);
+
+if(isset($_POST['submit'])){
+
+    //MAIL PARAM 
+    if (empty($_POST['name'])){
+        echo "Il manque votre nom";
+        die;
+    }
+    else
+    $name = $_POST['name'];
+    
+    if (empty($_POST['email'])){
+        echo "Il manque votre email";
+        die;
+    }
+    else 
+    $email = $_POST['email'];
+
+    if (empty($_POST['subject'])){
+        echo "Il manque votre email";
+        die;
+    }
+    else 
+    $subject = $_POST['subject'];
+
+    if (empty($_POST['message'])){
+        echo "Il manque votre Message";
+        die;
+    }
+    else 
+    $message = $_POST['message'];
+
+    //INSERTION DB
+    $req = $db->prepare("SELECT COUNT(*) FROM `contact` WHERE Message = :message AND Email = :email");
+    $req->bindParam(':message', $message);
+    $req->bindParam(':email', $email);
+    $req->execute();
+
+    $count = $req->fetch();
+
+    if($count[0] > 0)
+    {
+        echo "Formulaire déjà envoyé";
+        die;
+    }
+    else
+    $stmt = $db->prepare("INSERT INTO `Contact`
+            (Nom, Email, Subject, Message) 
+            VALUES
+            (:name , :email , :subject , :message) 
+            ");
+
+    $stmt->bindParam(':name', $name);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':subject', $subject);
+    $stmt->bindParam(':message', $message);
+    $stmt->execute();
+
+    $destinataire = "doubleo.vk@gmail.com";
+    $header = "exemple@test.com";
+    $header .= "MIME-Version: 1.0\r\n";
+    $header.='From:"spacecat@space.com>'."\n";
+    $header.='Content-Type:text/html; charset="uft-8"'."\n";
+    $header.='Content-Transfer-Encoding: 8bit';
+
+    $message ='
+    <html>
+        <body>
+            <div align="center">
+                <br />
+                <p> '. $_POST['message'] .' </p>
+                <br />
+            </div>
+        </body>
+    </html>
+    ';
+
+    mail($destinataire, $subject, $message, $header);
+}
+
+?>
+
 <! DOCTYPE html>
 <html> 
 	<head lang="eng">
@@ -26,7 +114,7 @@
 			</nav>
 			<div class="ttButton">
 				<a href="#">Shop</a>
-				<a href="#">Login</a>
+				<a href="login.php">Login</a>
 			</div><!--ttButton-->
 		</header>
 		
@@ -54,13 +142,20 @@
 				</div>
 			</section>	
 			
-			<form class="content">
-                <input type="text" name="name" id="name" placeholder="Name" maxlength="50" />
-                <input type="email" placeholder="Email" />
-                <input type="text" name="subject" id="subject" placeholder="Subject" maxlength="10" />
-                <input class="message" type="text" name="message" id="message" placeholder="Message" maxlength="10" />
-                <button type="button">Send Message</button>
-			</form>
+            <form action="" class="content" method="post">
+                <input type="text" name="name" id="name" placeholder="Name" required/>
+                <input type="email" name="email" placeholder="Email" required />
+                <input type="text" name="subject" id="subject" placeholder="Subject" maxlength="40" required />
+                <input class="message" type="text" name="message" id="message" placeholder="Message" required />
+                <input name="submit" type="submit">
+            </form>
+			
+            <?php if(isset($_POST['submit'])){
+            	if($count[0] == 0){
+            	echo '<div class="content"> Merci pour votre message ' . $name . ' </div>';
+            	}
+        	}
+            ?>
 			
 			<section id="map">
                <iframe src="https://www.google.com/maps/d/embed?mid=1xiM95ILBpxYH3jMipETasKBVgx-WZ30O" width="640" height="480"></iframe>
